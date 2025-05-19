@@ -1,0 +1,209 @@
+{
+  "name": "calendarSlotCheckTool",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "slot_strat_time"
+            },
+            {
+              "name": "slot_end_time"
+            },
+            {
+              "name": "date_start_time"
+            },
+            {
+              "name": "date_end_time"
+            },
+            {
+              "name": "duration",
+              "type": "number"
+            },
+            {
+              "name": "email_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "264e14e0-a6b3-41d1-9f11-402a417621f7",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "691106a4-7389-4f7b-a4e0-926cb2f65949",
+              "name": "date_start_time",
+              "value": "={{ $json.date_start_time }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b6e819-1ee4-493d-a484-8285720ab9ab",
+              "name": "date_end_time",
+              "value": "={{ $json.date_end_time }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "169d9f15-aae4-4ecf-ba24-b56cdf003cbd",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const slot_start = $('When Executed by Another Workflow').first().json.slot_strat_time; \nconst slot_end = $('When Executed by Another Workflow').first().json.slot_end_time; \n\nconst slotStartTime = new Date(slot_start);\nconst slotEndTime = new Date(slot_end);\n\nlet isSlotFree = true; \n\nfor (const item of $input.all()) {\n\n  if (!item.json.data || !Array.isArray(item.json.data)) {\n    continue;\n  }\n\n  for (const meeting of item.json.data) {\n    const meetingStartTime = new Date(meeting.start_time);\n    const meetingEndTime = new Date(meeting.end_time);\n    \n    if (slotStartTime < meetingEndTime && slotEndTime > meetingStartTime) {\n      isSlotFree = false; \n      break; \n    }\n  }\n  if (!isSlotFree) {\n    break; \n  }\n}\n\nreturn [{ json: { isSlotFree } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        0
+      ],
+      "id": "6bd11f07-4c28-48a1-ad95-570c59d234df",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst output = [];\n\nfor (const item of $input.all()) {\n  const events = item.json?.data?.events || [];\n\n  for (const event of events) {\n    output.push({\n      meeting_name: event.summary || \"No Title\",\n      start_time: event.start?.dateTime || \"No Start Time\",\n      end_time: event.end?.dateTime || \"No End Time\"\n    });\n  }\n}\n\nreturn {\n  data: output\n};\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "7a408543-42aa-46ef-a40c-46be51aaa29d",
+      "name": "Code5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c5bbfd6-6432-4464-af1e-f454e051ac5c",
+              "name": "isSlotFree",
+              "value": "={{ $json.isSlotFree }}",
+              "type": "boolean"
+            },
+            {
+              "id": "8c95741e-da91-4416-bfc0-54afc9cfbf59",
+              "name": "Occupied Slots",
+              "value": "={{ $('Code5').item.json.data }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1240,
+        0
+      ],
+      "id": "18f5d3cb-e0cc-4efe-8ea8-140f629b0776",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "url": "http://35.209.123.128:8001/api/v1/google-calendar/get-calendar-events",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={\n  \"client_email\": \"{{ $('When Executed by Another Workflow').item.json.email_id }}\",\n  \"start_time\": \"{{ $('When Executed by Another Workflow').item.json.date_start_time }}\",\n  \"end_time\": \"{{ $('When Executed by Another Workflow').item.json.date_end_time }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "03fee7f7-21d0-4504-8c79-d3244f4ce8b0",
+      "name": "Get_Event"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Get_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Event": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cf3be708-4282-4119-ab2b-5354bf799b8b",
+  "meta": {
+    "instanceId": "2b6ad710476370befb978470c5b4af9014434cf94b5a222808cbbccf0bd559e2"
+  },
+  "id": "jxxvUD9NZDfc7k63",
+  "tags": []
+}

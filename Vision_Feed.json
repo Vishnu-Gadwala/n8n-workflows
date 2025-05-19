@@ -1,0 +1,151 @@
+{
+  "name": "Vision_Feed",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Vision_Feeder').item.json.body.data.session_id }}",
+        "messageData": "={{ $json.data }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        -480
+      ],
+      "id": "2b573c6b-3a60-41a6-a986-0a32f2f74620",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd095405-6481-4f01-a347-db6303d82307",
+              "name": "visual_context",
+              "value": "={{ $json.body.data.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -620,
+        -480
+      ],
+      "id": "ce821145-e36a-41dd-8528-97a8a8547014",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "let output = [];\n\nfor (const item of $input.all()) {\n  const visual_context = item.json?.visual_context;\n  if (visual_context) {\n\n    const parsedLines = visual_context\n      .split('\\n')\n      .map(line => line.trim()) \n      .filter(line => line !== '') \n      .map(line => {\n\n        return line.replace(/,\\s*$/, '') \n                   .replace(/^[\"']|[\"']$/g, ''); \n      });\n\n    output.push(...parsedLines);\n  }\n}\n\nreturn {\n  data: output\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -440,
+        -480
+      ],
+      "id": "f6e3bf9b-77ed-4f8b-9e19-4986ae18a8cc",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "63959a90-2e99-4e1f-833b-ec2e33a7e18a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -820,
+        -480
+      ],
+      "id": "710b8e72-c296-4564-878e-30ed8e72e279",
+      "name": "Vision_Feeder",
+      "webhookId": "63959a90-2e99-4e1f-833b-ec2e33a7e18a"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "session_1745942144140_44_449",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -820
+      ],
+      "id": "3f12e684-37f3-43ba-a544-a4a17b92bfa1",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Redis": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision_Feeder": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "451075e7-a82f-4915-8f61-a2d5a5839669",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b6ad710476370befb978470c5b4af9014434cf94b5a222808cbbccf0bd559e2"
+  },
+  "id": "aswYvoKR46T4ikV8",
+  "tags": []
+}

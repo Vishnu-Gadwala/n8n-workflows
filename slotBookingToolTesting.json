@@ -1,0 +1,480 @@
+{
+  "name": "slotBookingToolTesting",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "slotBookingToolTest",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        20,
+        0
+      ],
+      "id": "0ced8bbb-8830-4125-90c8-c8a4cd0767a5",
+      "name": "Webhook",
+      "webhookId": "daebe11f-cb40-429c-87b8-128af73f308c"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2080,
+        0
+      ],
+      "id": "0bc5aee0-ac14-4134-9a7b-2bf0d524cebd",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zoom.us/oauth/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic YkdveE9jMFVUWXVYbXppOUV5Qk1JUTozU3VFU3hXZGJaT3R4U2tON01yTTB4QlRwdnR5N2VPcA=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "account_credentials"
+            },
+            {
+              "name": "account_id",
+              "value": "9PIzTONiRSSdwNhVUObU_g"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "b5001759-0e96-4fc3-a889-f94cc3478b35",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "555a5018-e5fa-46bd-97e9-0cae6119095f",
+              "name": "accessToken",
+              "value": "={{ $json.access_token }}",
+              "type": "string"
+            },
+            {
+              "id": "4b502d6c-fdc2-4d63-9fb2-5ab391d1654f",
+              "name": "Start_Time",
+              "value": "={{ $('Webhook').item.json.body.startTime }}",
+              "type": "string"
+            },
+            {
+              "id": "c2175cd6-dd89-4fb1-98fa-f889dd6ce914",
+              "name": "Duration",
+              "value": "={{ $('Webhook').item.json.body.duration }}",
+              "type": "number"
+            },
+            {
+              "id": "84109db1-e836-4ceb-9bb2-523a7388d4c1",
+              "name": "Topic",
+              "value": "={{ $('Webhook').item.json.body.topic }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        0
+      ],
+      "id": "e05186d0-2847-4975-b223-6ad2a8e0470f",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer  {{ $json.accessToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"topic\": \"{{ $json.Topic }}\",\n  \"type\": 2,\n  \"start_time\": \"{{ $json.Start_Time }}\",\n  \"duration\": \"{{ $json.Duration }}\",\n  \"settings\": {\n    \"waiting_room\": true,\n    \"password\": \"\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "7ec84410-01ca-4abe-8bf8-87bd10da30f0",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c9a1286f-3960-4609-b050-5618c2c3c6a2",
+              "name": "start_url",
+              "value": "={{ $json.start_url }}",
+              "type": "string"
+            },
+            {
+              "id": "8a1fb3a1-5788-41fc-8ca9-2830dc93883b",
+              "name": "Start_Time",
+              "value": "={{ $('Edit Fields3').item.json.Start_Time }}",
+              "type": "string"
+            },
+            {
+              "id": "383812aa-35ff-40fd-a14c-091215428eb5",
+              "name": "Duration",
+              "value": "={{ $('Edit Fields3').item.json.Duration }}",
+              "type": "string"
+            },
+            {
+              "id": "fa52555b-78a8-4098-b0a7-da2cf570b7ad",
+              "name": "Topic",
+              "value": "={{ $('Edit Fields3').item.json.Topic }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        920,
+        0
+      ],
+      "id": "67e40116-e32c-4a65-8d4c-01f156d0c566",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "resource": "mail",
+        "fromEmail": "no-reply@cornerstonex.ai",
+        "fromName": "CornerstoneX",
+        "toEmail": "={{ $('Webhook').item.json.body.email_id }}",
+        "subject": "={{ $('Edit Fields5').item.json.summary }}",
+        "contentValue": "=Dear {{ $('Webhook').item.json.body.userName }},\n\nThank you for reaching out to our Client Support. We have received your support request and our team is currently reviewing it. Please see the attachment with the details of your request.\n\nYour ticket details:\nTicket Number: {{ $('Webhook').item.json.body.ticketNumber }}\nIssue: {{ $('Webhook').item.json.body.topic }}\n\nThe meeting is scheduled for {{ $('Webhook').item.json.body.timingFormat }}\n\nZoom Link: {{ $('HTTP Request4').item.json.join_url }}\n\nOur support team will get back to you as soon as possible. In the meantime, if you have any additional information that may help us resolve your issue more efficiently, please reply to this email.\nFor urgent matters, feel free to contact us at (+1)786-547-3566 or visit our Help Center: www.cornerstonex.ai\nWe appreciate your patience and will do our best to resolve your issue quickly.\n\nBest regards,\nCornerstoneX Support Team\nno-reply@cornerstonex.ai | www.cornerstonex.ai",
+        "additionalFields": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        0
+      ],
+      "id": "abffb509-87b3-4aba-8700-0a9f0db5f5ee",
+      "name": "SendGrid1",
+      "credentials": {
+        "sendGridApi": {
+          "id": "ZkjWwK5Y7MuQCcuD",
+          "name": "SendGrid account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6637f328-61a0-428e-b5fa-7ec66affd03e",
+              "name": "summary",
+              "value": "={{ $('Webhook').item.json.body.topic }}",
+              "type": "string"
+            },
+            {
+              "id": "5050577c-6fa7-4812-b5f3-5193b9bd5c73",
+              "name": "User_name",
+              "value": "={{ $('Webhook').item.json.body.userName }}",
+              "type": "string"
+            },
+            {
+              "id": "4581b047-733d-463c-b48a-5967caf4db07",
+              "name": "Zoom_Link",
+              "value": "={{ $('Edit Fields4').item.json.start_url }}",
+              "type": "string"
+            },
+            {
+              "id": "8a454f22-ba93-451f-b124-4d1d588179e9",
+              "name": "attendees[0].email",
+              "value": "={{ $('Webhook').item.json.body.email_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        0
+      ],
+      "id": "f27c156c-4973-4d5b-98e8-9c3303f8895e",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://35.209.123.128:8000/api/v1/Service_Report",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "duration",
+              "value": "={{ $('Webhook').item.json.body.duration }}"
+            },
+            {
+              "name": "ticketNumber",
+              "value": "={{ $('Webhook').item.json.body.ticketNumber }}"
+            },
+            {
+              "name": "timingFormat",
+              "value": "={{ $('Webhook').item.json.body.timingFormat }}"
+            },
+            {
+              "name": "timezone",
+              "value": "={{ $('Webhook').item.json.body.timezone }}"
+            },
+            {
+              "name": "userName",
+              "value": "={{ $('Webhook').item.json.body.userName }}"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $('Webhook').item.json.body.topic }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('Webhook').item.json.body.startTime }}"
+            },
+            {
+              "name": "issueDescription",
+              "value": "={{ $('Webhook').item.json.body.issueDescription }}"
+            },
+            {
+              "name": "suggestedTroubleShootingSteps",
+              "value": "={{ $('Webhook').item.json.body.suggestedTroubleShootingSteps }}"
+            },
+            {
+              "name": "appointmentTime",
+              "value": "={{ $('Webhook').item.json.body.appointmentTime }}"
+            },
+            {
+              "name": "appointmentDate",
+              "value": "={{ $('Webhook').item.json.body.appointmentDate }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('Webhook').item.json.body.email_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        0
+      ],
+      "id": "61503690-07e0-4ad0-b944-5a6653898e72",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://35.209.123.128:8001/api/v1/google-calendar/create-calendar-event",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_email",
+              "value": "={{ $('Webhook').item.json.body.email_id }}"
+            },
+            {
+              "name": "issue_summary",
+              "value": "={{ $('Webhook').item.json.body.topic }}"
+            },
+            {
+              "name": "start_time",
+              "value": "={{ $('Webhook').item.json.body.startTime }}"
+            },
+            {
+              "name": "end_time",
+              "value": "={{ $('Webhook').item.json.body.startTime.toDateTime().plus($('Webhook').item.json.body.duration, minutes).toString() }}"
+            },
+            {
+              "name": "meeting_description",
+              "value": "={{ $('Webhook').item.json.body.issueDescription }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        0
+      ],
+      "id": "4e4266f1-b255-4d59-9ca4-50da7899d3e7",
+      "name": "Create_Event"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Create_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendGrid1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "SendGrid1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create_Event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e98de3f1-4c15-4882-96b2-9dbfedcfbb9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b6ad710476370befb978470c5b4af9014434cf94b5a222808cbbccf0bd559e2"
+  },
+  "id": "4LLxDjqDwb37cqPR",
+  "tags": []
+}

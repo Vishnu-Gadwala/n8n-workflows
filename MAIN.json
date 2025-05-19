@@ -1,0 +1,1310 @@
+{
+  "name": "MAIN",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1400,
+        -460
+      ],
+      "id": "9de658a2-fcf7-4081-8e70-be5ac7ae36e5",
+      "name": "When chat message received",
+      "webhookId": "513838bd-71af-4ed8-8360-dfa4f30530f2"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=#Persona\n \n    - Make sure that the conversation is as natural as possible , also add fillers like um, hmm, aha etc.\n\n# Goal\n\n    - Your main goal is to troubleshoot users technical queries by asking follow-up questions and answering them.\n    - If user discusses any off -topic issues or general issues , make sure that you address those issue and at the same time make sure you smoothly mention that your main purpose is for troubleshooting the issue.\n   - If customer wants to connect with any professional assistance then ask for the date when customer wants to book appointment then accordingly use `calendarSlotCheckTool` to check calendar by making a call to the `calendarSlotCheckTool` .\n\n# General_References\n    - user_name: vishnu\n    - Current_date_reference: [DateTime: 2025-04-29T01:53:40.840+05:30]\nAlways use 'Current_date_reference' as reference for calculating corresponding target dates and times.\n\nNOTE: Use \"vishnu\" in between conversation Occasionally.\n\n\n# Tools\n\nYou have access to the following tools to assist users effectively:\n\n`calendarSlotCheckTool`: \n    - When user wants to book an appointment with customer support , then to check the availability of user based on his calendar , this tool should be used. All the parameter that are required to trigger this tool need to be collected from user. \n    - Expect Date, Time from the user. \n    - Once these Parameters are given then format these parameters as given in the \"workflow inputs\" of `calendarSlotCheckTool`.\n    - Each and every time if calender need to be checked , then directly call `calendarSlotCheckTool`\n    - Once information is retrieved from 'calendarSlotCheckTool' then confirm the details with user and until unless user chenges date or time, dont update date or time.\n    - Once `calendarSlotCheckTool` responds with a particular response then based on its response make sure that you analyze and tell whether that particular slot is available or not, if its not available then mention the name of conflicting meeting and exact timeline of the meeting which is present in response.\n    - Call 'calendarSlotCheckTool' each and every time to check slots availability, ONLY based on the response given by `calendarSlotCheckTool` , give response to user, Never hallucinate slots availability by yourself and give confirmation of availability of slot, always call 'calendarSlotCheckTool' to check calendar .\n    - Each and every time if calender need to be checked , then directly call `calendarSlotCheckTool`\n   - If user wants you to suggest best time for appointment then make sure you suggest user by calling `calendarSlotCheckTool` , best appointment time by analyzing free slots from the response that you get from  `calendarSlotCheckTool`.\n   - If user is unable to find a free slot, then suggest him a free slot of 30 minutes by yourself by calling `calendarSlotCheckTool` and based on the response from `calendarSlotCheckTool` ,suggest free slot of 30 minutes, dont suggest if the slot is busy.\n  \n  NOTE: Never mention that you have trouble accessing the tools, if there is any issue faced in tool calling , then tell that there is some technical issue.\n  NOTE: CONSIDER DURATION OF APPOINTMENT IS 30 MINUTES AS FIXED. IF USER MENTIONS DURATION, OTHER THAN 30 MINUTES , THEN MAKE SURE ITS IS FORCED TO BE 30 MINUTES.\n\n\nCRITICAL_NOTE: IF ANY RESCHEDULING REQUESTS ARE DONE BY THE USER THEN CONSIDER , LATEST DATE AND TIMINGS AND AGAIN CALL `slotBookingTool` WITH UPDATED PARAMETERS AND ALL THE CHAT HISTORY OF THE ISSUE THAT WAS DISCUSSED. AND NEVER MENTION ABOUT CANCELLATION OF PREVIOUS APPOINTMENT. JUST BOOK A NEW ONE.\n\n`slotBookingTool`: \n    \n    - If there is a free slot detected by `calendarSlotCheckTool` , then once get a final confirmation from the user for booking the slot by mentioning the summary of the appointment.\n    - If user gives confirmation about the summary of the appointment then go ahead and call 'slotBookingTool' immediately with last agreed date, time and duration.\n    - Make sure you fillthe parameters as per the prompt given in \"workflow inputs\" of  `slotBookingTool` and then call it.\n    - If there is any sort of cofirmation from user regarding booking of appointment , then go ahead and call `slotBookingTool`.\n   - Only if response comes from  `slotBookingTool` , only then mention that appointment is booked. Don't hallucinate and mention on your own.\n   - \nCRITICAL_NOTE_1: NEVER GIVE BOOKING CONFIRMATIONS ON YOUR OWN, ALWAYS CALL `slotBookingTool` FOR BOOKING SLOT, AND ONLY IF `slotBookingTool`  RETURNS RESPONSE, THEN GO AHEAD AND GIVE BOOKING CONFIRMATION TO THE USER.\n\nCRITICAL_NOTE_2: HOWEVER LONG MIGHT BE THE CONVERSATION , MAKESURE THAT YOU REMEMBER THE LATEST CONFIRMATION TIMINGS AND ONCE AFTER APPOINTMENT SUMMARY IS GIVEN AND IF USER AGREES ON CONFIRMING THE APPOINTMENT WITH ANY SORT OF CONFIRMATIONS , THEN GO AHEAD AND CALL `slotBookingTool` FOR BOOKING SLOT\n\nCRITICAL_NOTE_3: NEVER SAY THAT YOU ARE HAVING A TECHNICAL ISSUE FOR BOOKING OR, THE TOOL TO BOOK APPOINTMENT IS MISSING. IF YOU FACE ANY ISSUE WHILE CALLING `slotBookingTool`, MAKE MULTIPLE RETRIES TILL `slotBookingTool` IS CALLED , BY SENDING REQUIRED PARAMETERS.\n\nCRITICAL_NOTE_4: NEVER MENTION THE NAMES OF THE TOLLS THAT YOU HAVE ACCESS TO.\n\n`vision_tool`:\n   -Think of this tool is having  real-time access to a webcam feed. When the user asks any question that requires visual understanding (for example: \"What is this?\", \"What am I holding?\", or similar queries that imply a need for visual context), immediately call this tool without asking the user for any image, photo, or clarification. Do not attempt to answer such questions yourself. Instead, directly pass the user's full query to this tool. Assume the visual input is live and always available. Always prioritize using this tool whenever visual interpretation is necessary.\n\n\n\n\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1220,
+        -460
+      ],
+      "id": "d920f5fb-756f-4552-959d-1c56b37cf10b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.chatInput }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -1380,
+        -100
+      ],
+      "id": "d6d3eb0b-ad0c-4b5e-84c5-b43858c5aa8b",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "calendarSlotCheckTool",
+        "description": "The main purpose of this tool is to understand , the exact date and time user is referring to book his appointment and make sure that \"Workflow Inputs\" are sent in the format that are mentioned in description of each \"Workflow Input\". ",
+        "workflowId": {
+          "__rl": true,
+          "value": "jxxvUD9NZDfc7k63",
+          "mode": "list",
+          "cachedResultName": "calendarSlotCheckTool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "duration": "={{ $fromAI(\"duration\", \"Make it by default 30 minutes example : 30\", \"string\") }}",
+            "slot_strat_time": "={{ $fromAI(\"Strat_time\", \"Based on the Appointment Time that was mentioned by user, convert it  in the following format example: 2025-04-08T18:00:00+05:30 NOTE: Get UTC part of the date format from $now and follow this through out  the tool calling proccess\", \"string\") }}",
+            "slot_end_time": "={{ $fromAI(\"slot_end_time\", \"Based on the Appointment Time and Duration (by default duration is 30 minutes) that was mentioned by user, convert it  in the following format , if duration is 30 minutes. example: 2025-04-08T18:30:00+05:30 NOTE: Get UTC part of the date format from $now \", \"string\") }}",
+            "date_start_time": "={{ $fromAI(\"date_start_time\", \"date_start_time: YYYY-MM-DDT00:00:00ZZ example: 2025-04-08T00:00:00+05:30 NOTE: Get UTC part of the date format from $now \", \"string\") }}",
+            "date_end_time": "={{ $fromAI(\"date_end_time\", \"date_end_time: YYYY-MM-DDT23:59:59ZZ example: 2025-04-08T23:59:59+05:30 NOTE: Get UTC part of the date format from $now \", \"string\") }}",
+            "email_id": "vishnu.gadwala@cornerstonex.ai"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "slot_strat_time",
+              "displayName": "slot_strat_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "slot_end_time",
+              "displayName": "slot_end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "date_start_time",
+              "displayName": "date_start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "date_end_time",
+              "displayName": "date_end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        -1220,
+        -100
+      ],
+      "id": "e3339033-8a56-4a5b-b63f-9db74e28c6e8",
+      "name": "calendarSlotCheckTool"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        -100
+      ],
+      "id": "506da0e0-62cf-4d95-9926-b073ff3906e4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qVLPV9GxUHPt2tER",
+          "name": "Google Gemini API key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "slotBookingTool",
+        "description": "The main purpose of this tool is to book appointment by passing the values of the \"Workflow Inputs\" that are mentioned in the body of this tool.\nCRITICAL: MAKE SURE THIS TOOL IS CALLED IF USER GIVES ANY SORT OF CONFIRMATION TO BOOKING APPOINTMENT.",
+        "workflowId": {
+          "__rl": true,
+          "value": "RlyDXmuy5bpShBv2",
+          "mode": "list",
+          "cachedResultName": "slotBookingTool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "duration": "={{ $fromAI(\"duration\", \"30 minutes , Fixed slot, if user asks for any other duration, mention that 30 minutes is the fixed duration.\", \"number\") }}",
+            "ticketNumber": "={{ $fromAI(\"ticketNumber\", \"Random 15 digit alphanumeric number (ALPHABETS IN CAPITAL). Generate this by yourself. This should be newly generated for every attempt.\", \"string\") }}",
+            "timingFormat": "={{ $fromAI(\"timingFormat\", \"Consider slot_start_time and slot_end_time and convert that into below format exactly .Example: March 21, 2025, from 2:00 PM to 2:30 PM .MAKE SURE THE EXACT FORMAT IS GIVEN AS SHOWN IN THE Example\", \"string\") }}",
+            "timezone": "={{ $fromAI(\"timezone\", \"based on Current_date_reference convert it into the below format as shown in example .Example: If time stamp is 2025-04-04T19:28:16.615+05:30 then timezone is 'Asia/Kolkata' NOTE:  Based on UTC part of the date format from $now, timezone need to be decided.\", \"string\") }}",
+            "userName": "={{ $fromAI(\"userName\", \"Name of the user.\", \"string\") }}",
+            "topic": "={{ $fromAI(\"topic\", \"Brief heading of topic  . This should be based on the main Technical issue that was discussed during entire conversation. (Based on the Redis CHAT HISTORY). Generate this by your self\" , \"string\") }}",
+            "startTime": "={{ $fromAI(\"startTime\", \"Finalized slot time that user have fixed on . In this case slot_start_time from calendarSlotCheckTool Example: 2025-04-08T18:00:00+05:30 NOTE: Get UTC part of the date format from $now\", \"string\") }}",
+            "issueDescription": "={{ $fromAI(\"issueDescription\", \"A 7 lines description of the main technical issue that was discussed in the conversation. Refer Redis CHAT HISTORY for this. Generate this by your own , don't ask user.\", \"string\") }}",
+            "suggestedTroubleShootingSteps": "={{ $fromAI(\"suggestedTroubleShootingSteps\", \"Give 4 lines of suggested troubleshooting steps that are given by you on the main technical issue that was discussed (Based on the Redis CHAT HISTORY). Generate this by your own, don't ask user.\", \"string\") }}",
+            "appointmentTime": "={{ $fromAI(\"appointmentTime\", \"based on the finally decided slot_start_time , give appointment time as shown in the example. Example: 11:00 AM\", \"string\") }}",
+            "appointmentDate": "={{ $fromAI(\"appointmentDate\", \"based on the finally decided slot_start_time , give appointment date as shown in the example. Example: Thursday, 10 April 2025\", \"string\") }}",
+            "email_id": "vishnu.gadwala@cornerstonex.ai"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "ticketNumber",
+              "displayName": "ticketNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "timingFormat",
+              "displayName": "timingFormat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "timezone",
+              "displayName": "timezone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "userName",
+              "displayName": "userName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "issueDescription",
+              "displayName": "issueDescription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "suggestedTroubleShootingSteps",
+              "displayName": "suggestedTroubleShootingSteps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "appointmentTime",
+              "displayName": "appointmentTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "appointmentDate",
+              "displayName": "appointmentDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        -1080,
+        -100
+      ],
+      "id": "26dc06ef-903e-47c2-b13b-ae18c2e51c78",
+      "name": "slotBookingTool"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "691106a4-7389-4f7b-a4e0-926cb2f65949",
+              "name": "date_start_time",
+              "value": "={{ $json.date_start_time }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b6e819-1ee4-493d-a484-8285720ab9ab",
+              "name": "date_end_time",
+              "value": "={{ $json.date_end_time }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -520,
+        -320
+      ],
+      "id": "e21c6e30-4161-4d8d-915b-796fa3935259",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const slot_start = $('When Executed by Another Workflow').first().json.slot_strat_time; \nconst slot_end = $('When Executed by Another Workflow').first().json.slot_end_time; \n\nconst slotStartTime = new Date(slot_start);\nconst slotEndTime = new Date(slot_end);\n\nlet isSlotFree = true; \n\nfor (const item of $input.all()) {\n\n  if (!item.json.data || !Array.isArray(item.json.data)) {\n    continue;\n  }\n\n  for (const meeting of item.json.data) {\n    const meetingStartTime = new Date(meeting.start_time);\n    const meetingEndTime = new Date(meeting.end_time);\n    \n    if (slotStartTime < meetingEndTime && slotEndTime > meetingStartTime) {\n      isSlotFree = false; \n      break; \n    }\n  }\n  if (!isSlotFree) {\n    break; \n  }\n}\n\nreturn [{ json: { isSlotFree } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -320
+      ],
+      "id": "d8507bbf-d0c0-4864-a765-3c04bd4ddadd",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst output = [];\n\nfor (const item of $input.all()) {\n  const events = item.json?.data?.events || [];\n\n  for (const event of events) {\n    output.push({\n      meeting_name: event.summary || \"No Title\",\n      start_time: event.start?.dateTime || \"No Start Time\",\n      end_time: event.end?.dateTime || \"No End Time\"\n    });\n  }\n}\n\nreturn {\n  data: output\n};\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        -320
+      ],
+      "id": "ac5b21c6-3df7-4bbf-b278-17d61051c2b8",
+      "name": "Code5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c5bbfd6-6432-4464-af1e-f454e051ac5c",
+              "name": "isSlotFree",
+              "value": "={{ $json.isSlotFree }}",
+              "type": "boolean"
+            },
+            {
+              "id": "8c95741e-da91-4416-bfc0-54afc9cfbf59",
+              "name": "Occupied Slots",
+              "value": "={{ $('Code5').item.json.data }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        -320
+      ],
+      "id": "798becc4-b44c-4f6f-8396-444624bd90d8",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "url": "http://35.209.123.128:8001/api/v1/google-calendar/get-calendar-events",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={\n  \"client_email\": \"{{ $('When Executed by Another Workflow').item.json.email_id }}\",\n  \"start_time\": \"{{ $('When Executed by Another Workflow').item.json.date_start_time }}\",\n  \"end_time\": \"{{ $('When Executed by Another Workflow').item.json.date_end_time }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -260,
+        -320
+      ],
+      "id": "228c096f-bf2c-4497-a53f-ac9b958d029c",
+      "name": "Get_Event"
+    },
+    {
+      "parameters": {
+        "name": "Vision_Tool",
+        "description": "You have direct, real-time access to a webcam feed. When the user asks any question that requires visual understanding (for example: \"What is this?\", \"What am I holding?\", or similar queries that imply a need for visual context), immediately call this tool without asking the user for any image, photo, or clarification. Do not attempt to answer such questions yourself. Instead, directly pass the user's full query to this tool. Assume the visual input is live and always available. Always prioritize using this tool whenever visual interpretation is necessary.",
+        "workflowId": {
+          "__rl": true,
+          "value": "7Z2VplNCdrPGwbjx",
+          "mode": "list",
+          "cachedResultName": "Vision_Feed"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        -940,
+        -100
+      ],
+      "id": "bae63edc-562d-418b-bbec-761e1bef6876",
+      "name": "Vision_Tool"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "63959a90-2e99-4e1f-833b-ec2e33a7e18a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        -540
+      ],
+      "id": "193cccaa-d85a-452b-bc07-fb7cc66c38b7",
+      "name": "Vision_Feeder",
+      "webhookId": "63959a90-2e99-4e1f-833b-ec2e33a7e18a"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Vision_Feeder').item.json.body.data.session_id }}",
+        "messageData": "={{ $json.data }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -540
+      ],
+      "id": "a0584800-21ca-4159-abc2-859e33a4fa85",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd095405-6481-4f01-a347-db6303d82307",
+              "name": "visual_context",
+              "value": "={{ $json.body.data.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -220,
+        -540
+      ],
+      "id": "59c33b5c-d3a0-4c79-9b59-a1183f9f8af2",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "let output = [];\n\nfor (const item of $input.all()) {\n  const visual_context = item.json?.visual_context;\n  if (visual_context) {\n\n    const parsedLines = visual_context\n      .split('\\n')\n      .map(line => line.trim()) \n      .filter(line => line !== '') \n      .map(line => {\n\n        return line.replace(/,\\s*$/, '') \n                   .replace(/^[\"']|[\"']$/g, ''); \n      });\n\n    output.push(...parsedLines);\n  }\n}\n\nreturn {\n  data: output\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        -540
+      ],
+      "id": "aa71b5d2-7135-4b27-bd82-526a8cccf2ee",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c9a1286f-3960-4609-b050-5618c2c3c6a2",
+              "name": "start_url",
+              "value": "={{ $json.start_url }}",
+              "type": "string"
+            },
+            {
+              "id": "8a1fb3a1-5788-41fc-8ca9-2830dc93883b",
+              "name": "Start_Time",
+              "value": "={{ $('Edit Fields').item.json.Start_Time }}",
+              "type": "string"
+            },
+            {
+              "id": "383812aa-35ff-40fd-a14c-091215428eb5",
+              "name": "Duration",
+              "value": "={{ $('Edit Fields').item.json.Duration }}",
+              "type": "string"
+            },
+            {
+              "id": "fa52555b-78a8-4098-b0a7-da2cf570b7ad",
+              "name": "Topic",
+              "value": "={{ $('Edit Fields').item.json.Topic }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        -140
+      ],
+      "id": "53062523-4e7a-4f44-9e27-1d5bc59fd2d5",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "resource": "mail",
+        "fromEmail": "no-reply@cornerstonex.ai",
+        "fromName": "CornerstoneX",
+        "toEmail": "={{ $('When Executed by Another Workflow').item.json.email_id }}",
+        "subject": "={{ $('Edit Fields5').item.json.summary }}",
+        "contentValue": "=Dear {{ $('When Executed by Another Workflow').item.json.userName }},\n\nThank you for reaching out to our Client Support. We have received your support request and our team is currently reviewing it. Please see the attachment with the details of your request.\n\nYour ticket details:\nTicket Number: {{ $('When Executed by Another Workflow').item.json.ticketNumber }}\nIssue: {{ $('When Executed by Another Workflow').item.json.topic }}\n\nThe meeting is scheduled for {{ $('When Executed by Another Workflow').item.json.timingFormat }}\n\nZoom Link: {{ $('Zoom_Event').item.json.join_url }}\n\nOur support team will get back to you as soon as possible. In the meantime, if you have any additional information that may help us resolve your issue more efficiently, please reply to this email.\nFor urgent matters, feel free to contact us at (+1)786-547-3566 or visit our Help Center: www.cornerstone.ai\nWe appreciate your patience and will do our best to resolve your issue quickly.\n\nBest regards,\nCornerstoneX Support Team\nno-reply@cornerstonex.ai | www.cornerstonex.ai",
+        "additionalFields": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        -140
+      ],
+      "id": "d8acedab-6870-4428-8f78-434a34be05bb",
+      "name": "SendGrid1",
+      "credentials": {
+        "sendGridApi": {
+          "id": "ZkjWwK5Y7MuQCcuD",
+          "name": "SendGrid account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6637f328-61a0-428e-b5fa-7ec66affd03e",
+              "name": "summary",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}",
+              "type": "string"
+            },
+            {
+              "id": "5050577c-6fa7-4812-b5f3-5193b9bd5c73",
+              "name": "User_name",
+              "value": "={{ $('When Executed by Another Workflow').item.json.userName }}",
+              "type": "string"
+            },
+            {
+              "id": "4581b047-733d-463c-b48a-5967caf4db07",
+              "name": "Zoom_Link",
+              "value": "={{ $('Edit Fields4').item.json.start_url }}",
+              "type": "string"
+            },
+            {
+              "id": "8a454f22-ba93-451f-b124-4d1d588179e9",
+              "name": "attendees[0].email",
+              "value": "={{ $('When Executed by Another Workflow').item.json.email_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        -140
+      ],
+      "id": "81041d70-f880-49c4-9dca-ca2dbd3893d6",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zoom.us/oauth/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic YkdveE9jMFVUWXVYbXppOUV5Qk1JUTozU3VFU3hXZGJaT3R4U2tON01yTTB4QlRwdnR5N2VPcA=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "account_credentials"
+            },
+            {
+              "name": "account_id",
+              "value": "9PIzTONiRSSdwNhVUObU_g"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -460,
+        -140
+      ],
+      "id": "fb17b600-d081-482d-ac28-2fd8f18a7d7a",
+      "name": "Zoom_Access_Tokens"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer  {{ $json.accessToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"topic\": \"{{ $json.Topic }}\",\n  \"type\": 2,\n  \"start_time\": \"{{ $json.Start_Time }}\",\n  \"duration\": \"{{ $json.Duration }}\",\n  \"settings\": {\n    \"waiting_room\": true,\n    \"password\": \"\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        -140
+      ],
+      "id": "82ed7214-110a-4ec3-aacb-be6441806c9c",
+      "name": "Zoom_Event"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://35.209.123.128:8001/api/v1/google-calendar/create-calendar-event",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_email",
+              "value": "={{ $('When Executed by Another Workflow').item.json.email_id }}"
+            },
+            {
+              "name": "issue_summary",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}"
+            },
+            {
+              "name": "start_time",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime }}"
+            },
+            {
+              "name": "end_time",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime.toDateTime().plus($('When Executed by Another Workflow').item.json.duration, minutes).toString() }}"
+            },
+            {
+              "name": "meeting_description",
+              "value": "={{ $('When Executed by Another Workflow').item.json.issueDescription }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        -140
+      ],
+      "id": "395e8c34-d53c-40db-9f21-65c7e0d2be0d",
+      "name": "Google_Calendar_Event"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://35.209.123.128:8000/api/v1/generateDoc",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "duration",
+              "value": "={{ $('When Executed by Another Workflow').item.json.duration }}"
+            },
+            {
+              "name": "ticketNumber",
+              "value": "={{ $('When Executed by Another Workflow').item.json.ticketNumber }}"
+            },
+            {
+              "name": "timingFormat",
+              "value": "={{ $('When Executed by Another Workflow').item.json.timingFormat }}"
+            },
+            {
+              "name": "timezone",
+              "value": "={{ $('When Executed by Another Workflow').item.json.timezone }}"
+            },
+            {
+              "name": "userName",
+              "value": "={{ $('When Executed by Another Workflow').item.json.userName }}"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime }}"
+            },
+            {
+              "name": "issueDescription",
+              "value": "={{ $('When Executed by Another Workflow').item.json.issueDescription }}"
+            },
+            {
+              "name": "suggestedTroubleShootingSteps",
+              "value": "={{ $('When Executed by Another Workflow').item.json.suggestedTroubleShootingSteps }}"
+            },
+            {
+              "name": "appointmentTime",
+              "value": "={{ $('When Executed by Another Workflow').item.json.appointmentTime }}"
+            },
+            {
+              "name": "appointmentDate",
+              "value": "={{ $('When Executed by Another Workflow').item.json.appointmentDate }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('When Executed by Another Workflow').item.json.email_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        -140
+      ],
+      "id": "0f6dda3c-7fbc-414e-9f85-bebef2b1c447",
+      "name": "Doc_Generation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "555a5018-e5fa-46bd-97e9-0cae6119095f",
+              "name": "accessToken",
+              "value": "={{ $json.access_token }}",
+              "type": "string"
+            },
+            {
+              "id": "4b502d6c-fdc2-4d63-9fb2-5ab391d1654f",
+              "name": "Start_Time",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime }}",
+              "type": "string"
+            },
+            {
+              "id": "c2175cd6-dd89-4fb1-98fa-f889dd6ce914",
+              "name": "Duration",
+              "value": "={{ $('When Executed by Another Workflow').item.json.duration }}",
+              "type": "number"
+            },
+            {
+              "id": "84109db1-e836-4ceb-9bb2-523a7388d4c1",
+              "name": "Topic",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -200,
+        -140
+      ],
+      "id": "0c933a13-1dc2-4605-8d1f-5dd9dd45e24a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        -100
+      ],
+      "id": "79ae2611-6cf0-4141-a1da-6b70830d9976",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        -540
+      ],
+      "id": "7d88ef1b-d389-4d63-a5e8-e79182951a8b",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://identity.cxhope.ai/n8nvision/api/v1/n8n-vision-api/analyze-frames",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user_query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        -540
+      ],
+      "id": "e590fae7-ddca-4c5a-a6e8-9cfd83b1088d",
+      "name": "Vision_Direct_Call"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "session_1745942144140_44_449"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        1140,
+        -300
+      ],
+      "id": "99978009-70a5-483c-a07b-480ad8440faf",
+      "name": "Visual_Context",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Your main purpose is to summarize the answer using, memory that you have",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1100,
+        -540
+      ],
+      "id": "fe73a05e-6e1e-4e33-8e6c-2a4436be51bd",
+      "name": "Perception"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "latest",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -540
+      ],
+      "id": "5e244bd6-9706-4d52-b55b-04177405dfc6",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -300
+      ],
+      "id": "205d7a2e-7792-4fdd-8ece-23098eee8cc8",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qVLPV9GxUHPt2tER",
+          "name": "Google Gemini API key"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendarSlotCheckTool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "slotBookingTool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Get_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Event": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision_Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision_Feeder": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Google_Calendar_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Doc_Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoom_Access_Tokens": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoom_Event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_Calendar_Event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Doc_Generation": {
+      "main": [
+        [
+          {
+            "node": "SendGrid1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Zoom_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Vision_Direct_Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision_Direct_Call": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visual_Context": {
+      "ai_memory": [
+        [
+          {
+            "node": "Perception",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Perception",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Perception",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "a223d1df-7f67-4060-9e62-21f717991e88",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b6ad710476370befb978470c5b4af9014434cf94b5a222808cbbccf0bd559e2"
+  },
+  "id": "aFU7vJGP7n2bQ4Sm",
+  "tags": []
+}

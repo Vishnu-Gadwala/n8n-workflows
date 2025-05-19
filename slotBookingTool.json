@@ -1,0 +1,492 @@
+{
+  "name": "slotBookingTool",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "555a5018-e5fa-46bd-97e9-0cae6119095f",
+              "name": "accessToken",
+              "value": "={{ $json.access_token }}",
+              "type": "string"
+            },
+            {
+              "id": "4b502d6c-fdc2-4d63-9fb2-5ab391d1654f",
+              "name": "Start_Time",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime }}",
+              "type": "string"
+            },
+            {
+              "id": "c2175cd6-dd89-4fb1-98fa-f889dd6ce914",
+              "name": "Duration",
+              "value": "={{ $('When Executed by Another Workflow').item.json.duration }}",
+              "type": "number"
+            },
+            {
+              "id": "84109db1-e836-4ceb-9bb2-523a7388d4c1",
+              "name": "Topic",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        0
+      ],
+      "id": "051053c1-0ddb-4f21-bc11-029bd2808c2a",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c9a1286f-3960-4609-b050-5618c2c3c6a2",
+              "name": "start_url",
+              "value": "={{ $json.start_url }}",
+              "type": "string"
+            },
+            {
+              "id": "8a1fb3a1-5788-41fc-8ca9-2830dc93883b",
+              "name": "Start_Time",
+              "value": "={{ $('Edit Fields3').item.json.Start_Time }}",
+              "type": "string"
+            },
+            {
+              "id": "383812aa-35ff-40fd-a14c-091215428eb5",
+              "name": "Duration",
+              "value": "={{ $('Edit Fields3').item.json.Duration }}",
+              "type": "string"
+            },
+            {
+              "id": "fa52555b-78a8-4098-b0a7-da2cf570b7ad",
+              "name": "Topic",
+              "value": "={{ $('Edit Fields3').item.json.Topic }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        0
+      ],
+      "id": "f359d997-c6e2-4001-b86a-569715600b38",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "resource": "mail",
+        "fromEmail": "no-reply@cornerstonex.ai",
+        "fromName": "CornerstoneX",
+        "toEmail": "={{ $('When Executed by Another Workflow').item.json.email_id }}",
+        "subject": "={{ $('Edit Fields5').item.json.summary }}",
+        "contentValue": "=Dear {{ $('When Executed by Another Workflow').item.json.userName }},\n\nThank you for reaching out to our Client Support. We have received your support request and our team is currently reviewing it. Please see the attachment with the details of your request.\n\nYour ticket details:\nTicket Number: {{ $('When Executed by Another Workflow').item.json.ticketNumber }}\nIssue: {{ $('When Executed by Another Workflow').item.json.topic }}\n\nThe meeting is scheduled for {{ $('When Executed by Another Workflow').item.json.timingFormat }}\n\nZoom Link: {{ $('Zoom_Event').item.json.join_url }}\n\nOur support team will get back to you as soon as possible. In the meantime, if you have any additional information that may help us resolve your issue more efficiently, please reply to this email.\nFor urgent matters, feel free to contact us at (+1)786-547-3566 or visit our Help Center: www.cornerstone.ai\nWe appreciate your patience and will do our best to resolve your issue quickly.\n\nBest regards,\nCornerstoneX Support Team\nno-reply@cornerstonex.ai | www.cornerstonex.ai",
+        "additionalFields": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        0
+      ],
+      "id": "44eb3007-30b7-4199-bce1-590cff7ea624",
+      "name": "SendGrid1",
+      "credentials": {
+        "sendGridApi": {
+          "id": "ZkjWwK5Y7MuQCcuD",
+          "name": "SendGrid account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6637f328-61a0-428e-b5fa-7ec66affd03e",
+              "name": "summary",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}",
+              "type": "string"
+            },
+            {
+              "id": "5050577c-6fa7-4812-b5f3-5193b9bd5c73",
+              "name": "User_name",
+              "value": "={{ $('When Executed by Another Workflow').item.json.userName }}",
+              "type": "string"
+            },
+            {
+              "id": "4581b047-733d-463c-b48a-5967caf4db07",
+              "name": "Zoom_Link",
+              "value": "={{ $('Edit Fields4').item.json.start_url }}",
+              "type": "string"
+            },
+            {
+              "id": "8a454f22-ba93-451f-b124-4d1d588179e9",
+              "name": "attendees[0].email",
+              "value": "={{ $('When Executed by Another Workflow').item.json.email_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1420,
+        0
+      ],
+      "id": "81a16154-243a-4e8e-bcb9-842382010a6a",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "duration",
+              "type": "number"
+            },
+            {
+              "name": "ticketNumber"
+            },
+            {
+              "name": "timingFormat"
+            },
+            {
+              "name": "timezone"
+            },
+            {
+              "name": "userName"
+            },
+            {
+              "name": "topic"
+            },
+            {
+              "name": "startTime"
+            },
+            {
+              "name": "email_id"
+            },
+            {
+              "name": "issueDescription"
+            },
+            {
+              "name": "suggestedTroubleShootingSteps"
+            },
+            {
+              "name": "appointmentTime"
+            },
+            {
+              "name": "appointmentDate"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1978765f-8bcc-4d03-aff4-47ec1ca4d234",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zoom.us/oauth/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic YkdveE9jMFVUWXVYbXppOUV5Qk1JUTozU3VFU3hXZGJaT3R4U2tON01yTTB4QlRwdnR5N2VPcA=="
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "account_credentials"
+            },
+            {
+              "name": "account_id",
+              "value": "9PIzTONiRSSdwNhVUObU_g"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        280,
+        0
+      ],
+      "id": "55883e69-6320-4d87-bdbc-c990b441cd22",
+      "name": "Zoom_Access_Tokens"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer  {{ $json.accessToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"topic\": \"{{ $json.Topic }}\",\n  \"type\": 2,\n  \"start_time\": \"{{ $json.Start_Time }}\",\n  \"duration\": \"{{ $json.Duration }}\",\n  \"settings\": {\n    \"waiting_room\": true,\n    \"password\": \"\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        0
+      ],
+      "id": "a2733fc7-fb21-4598-85cb-a32ca30b3265",
+      "name": "Zoom_Event"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://35.209.123.128:8001/api/v1/google-calendar/create-calendar-event",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_email",
+              "value": "={{ $('When Executed by Another Workflow').item.json.email_id }}"
+            },
+            {
+              "name": "issue_summary",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}"
+            },
+            {
+              "name": "start_time",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime }}"
+            },
+            {
+              "name": "end_time",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime.toDateTime().plus($('When Executed by Another Workflow').item.json.duration, minutes).toString() }}"
+            },
+            {
+              "name": "meeting_description",
+              "value": "={{ $('When Executed by Another Workflow').item.json.issueDescription }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ],
+      "id": "3deede9c-2fe8-4182-9de6-432bb4d68cf2",
+      "name": "Google_Calendar_Event"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://35.209.123.128:8000/api/v1/generateDoc",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "duration",
+              "value": "={{ $('When Executed by Another Workflow').item.json.duration }}"
+            },
+            {
+              "name": "ticketNumber",
+              "value": "={{ $('When Executed by Another Workflow').item.json.ticketNumber }}"
+            },
+            {
+              "name": "timingFormat",
+              "value": "={{ $('When Executed by Another Workflow').item.json.timingFormat }}"
+            },
+            {
+              "name": "timezone",
+              "value": "={{ $('When Executed by Another Workflow').item.json.timezone }}"
+            },
+            {
+              "name": "userName",
+              "value": "={{ $('When Executed by Another Workflow').item.json.userName }}"
+            },
+            {
+              "name": "topic",
+              "value": "={{ $('When Executed by Another Workflow').item.json.topic }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('When Executed by Another Workflow').item.json.startTime }}"
+            },
+            {
+              "name": "issueDescription",
+              "value": "={{ $('When Executed by Another Workflow').item.json.issueDescription }}"
+            },
+            {
+              "name": "suggestedTroubleShootingSteps",
+              "value": "={{ $('When Executed by Another Workflow').item.json.suggestedTroubleShootingSteps }}"
+            },
+            {
+              "name": "appointmentTime",
+              "value": "={{ $('When Executed by Another Workflow').item.json.appointmentTime }}"
+            },
+            {
+              "name": "appointmentDate",
+              "value": "={{ $('When Executed by Another Workflow').item.json.appointmentDate }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $('When Executed by Another Workflow').item.json.email_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1640,
+        0
+      ],
+      "id": "0a3b0784-106a-4437-aefa-d3fbc2ec5848",
+      "name": "Doc_Generation"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Zoom_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Google_Calendar_Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Doc_Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Zoom_Access_Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoom_Access_Tokens": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoom_Event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google_Calendar_Event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Doc_Generation": {
+      "main": [
+        [
+          {
+            "node": "SendGrid1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "722d889b-05c4-44d6-bb4f-1a2f514c5d04",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b6ad710476370befb978470c5b4af9014434cf94b5a222808cbbccf0bd559e2"
+  },
+  "id": "RlyDXmuy5bpShBv2",
+  "tags": []
+}

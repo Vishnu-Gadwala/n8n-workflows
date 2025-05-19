@@ -1,0 +1,225 @@
+{
+  "name": "Vision_Direct_Call",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -620,
+        -260
+      ],
+      "id": "35ee3418-47f7-492c-8f4d-417626a18bb2",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://identity.cxhope.ai/n8nvision/api/v1/n8n-vision-api/analyze-frames",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user_query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -420,
+        -260
+      ],
+      "id": "5c06b161-7f52-45d5-9d77-18c964758496",
+      "name": "Vision_Direct_Call"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        180,
+        0
+      ],
+      "id": "e00f35ac-e83a-4830-a3e1-0c51a34953e0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qVLPV9GxUHPt2tER",
+          "name": "Google Gemini API key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Code').item.json.propertyName }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        440,
+        20
+      ],
+      "id": "5ce1da07-5a91-45ab-8c03-888fd5be3186",
+      "name": "Visual_Context",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Your main purpose is to summarize the answer using, memory that you have",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        380,
+        -260
+      ],
+      "id": "1c6e567d-7c87-4fab-853b-5cb5a7fca9c8",
+      "name": "Perception"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "latest",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -260
+      ],
+      "id": "ccb7fd0d-5697-4205-99aa-a43d65f944a2",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "8JkLpcHeFYTiPeRg",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  if (item.json.propertyName) {\n    item.json.propertyName = item.json.propertyName.replace('_latest_frame', '');\n  }\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        40,
+        -260
+      ],
+      "id": "c68ba784-1190-4058-b447-eb2c127baae8",
+      "name": "Code"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "what am i holding in my hand"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Vision_Direct_Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision_Direct_Call": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Perception",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visual_Context": {
+      "ai_memory": [
+        [
+          {
+            "node": "Perception",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Perception",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1f558e0e-f4b7-4607-a4c5-e6e7a0bf671d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b6ad710476370befb978470c5b4af9014434cf94b5a222808cbbccf0bd559e2"
+  },
+  "id": "7Z2VplNCdrPGwbjx",
+  "tags": []
+}
